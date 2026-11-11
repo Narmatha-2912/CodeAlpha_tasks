@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block auth_content %}
+<div class="auth-wrap"><div class="auth-art"><a class="brand light" href="/"><span class="brand-mark">T</span>taskflow</a><div class="art-copy"><span class="eyebrow light-text">WORK BETTER, TOGETHER</span><h1>Great work<br>happens <em>together.</em></h1><p>Bring your team's projects, tasks and conversations into one calm, focused workspace.</p><div class="art-dots">● &nbsp; ● &nbsp; ●</div></div><div class="art-foot">PLAN SMARTER. DELIVER BETTER.</div></div>
+<div class="auth-panel"><div class="auth-card"><span class="eyebrow">WELCOME BACK</span><h2>Sign in to TaskFlow</h2><p class="muted">Enter your details to continue to your workspace.</p>
+<form method="post">{% csrf_token %}{% if form.errors %}<div class="form-error">Your username or password was incorrect.</div>{% endif %}
+<label>Username</label><input type="text" name="username" autofocus required placeholder="Your username">
+<label>Password</label><input type="password" name="password" required placeholder="Your password">
+<input type="hidden" name="next" value="{{ next }}"><button class="btn primary full">Sign in <span>→</span></button></form>
+<p class="auth-switch">New to TaskFlow? <a href="{% url 'register' %}">Create an account</a></p></div></div></div>
+{% endblock %}

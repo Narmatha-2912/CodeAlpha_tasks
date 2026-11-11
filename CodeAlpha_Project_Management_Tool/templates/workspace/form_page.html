@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}{{ heading }}{% endblock %}{% block page_heading %}{{ heading }}{% endblock %}
+{% block content %}<div class="form-card"><form method="post">{% csrf_token %}{% for field in form %}<div class="field"><label>{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="muted">{{ field.help_text|safe }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}<div class="form-actions"><a class="btn secondary" href="{% if back_pk %}{% url back_url back_pk %}{% else %}{% url back_url %}{% endif %}">Cancel</a><button class="btn primary">Save changes <span>→</span></button></div></form></div>{% endblock %}

@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }}{% endblock %}
+{% block page_heading %}{{ project.name }}{% endblock %}
+
+{% block content %}
+
+<div class="project-hero">
+    <div>
+        <span class="eyebrow">PROJECT WORKSPACE</span>
+
+        <p>
+            {{ project.description|default:"Keep your team aligned and moving forward." }}
+        </p>
+
+        <div class="hero-meta">
+            <span>
+                ◷
+                {% if project.deadline %}
+                    Deadline {{ project.deadline|date:"M d, Y" }}
+                {% else %}
+                    No deadline set
+                {% endif %}
+            </span>
+
+            <span>♙ {{ project.members.count }} members</span>
+        </div>
+    </div>
+
+    <div class="hero-actions">
+        {% if project.owner_id == user.id %}
+            <a class="btn secondary"
+               href="{% url 'project_edit' project.pk %}">
+                Edit project
+            </a>
+        {% endif %}
+
+        <a class="btn primary"
+           href="{% url 'task_create' project.pk %}">
+            ＋ Add task
+        </a>
+    </div>
+</div>
+
+
+<div class="board-title">
+    <div>
+        <span class="eyebrow">TASK BOARD</span>
+        <h3>Team tasks</h3>
+    </div>
+
+    <span class="muted">{{ tasks.count }} tasks</span>
+</div>
+
+
+{% if not tasks %}
+    <div class="column-empty">
+        No tasks yet. Click Add task to create your first task.
+    </div>
+{% endif %}
+
+
+<div class="kanban">
+
+    {% for status,label in columns %}
+
+        <div class="kanban-column">
+
+            <div class="column-heading">
+                <span class="column-dot {{ status }}"></span>
+                <strong>{{ label }}</strong>
+            </div>
+
+
+            {% for task in tasks %}
+
+                {% if task.status == status %}
+
+                    <div class="task-card">
+
+                        <div class="task-card-top">
+
+                            <span class="priority {{ task.priority }}">
+                                {{ task.get_priority_display }}
+                            </span>
+
+                            {% if user.id == project.owner_id or user.id == task.created_by_id %}
+                                <form method="post"
+                                      action="{% url 'task_delete' task.pk %}"
+                                      class="delete-task-form"
+                                      onsubmit="return confirm('Are you sure you want to delete this task?');">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="task-menu"
+                                            title="Delete task"
+                                            aria-label="Delete task">
+                                        •••
+                                    </button>
+
+                                </form>
+                            {% endif %}
+
+                        </div>
+
+
+                        <a class="task-title"
+                           href="{% url 'task_detail' task.pk %}">
+                            {{ task.title }}
+                        </a>
+
+                        <p>
+                            {{ task.description|default:"No description"|truncatechars:80 }}
+                        </p>
+
+
+                        <div class="task-card-foot">
+
+                            <span class="assignee-avatar">
+                                {% if task.assignee %}
+                                    {{ task.assignee.username|first|upper }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </span>
+
+                            <span class="due-date">
+                                {% if task.due_date %}
+                                    ◷ {{ task.due_date|date:"M d" }}
+                                {% else %}
+                                    No due date
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <form method="post"
+                              action="{% url 'task_status' task.pk %}"
+                              class="status-form">
+
+                            {% csrf_token %}
+
+                            <select name="status"
+                                    aria-label="Change task status"
+                                    onchange="this.form.submit()">
+
+                                <option value="todo"
+                                    {% if task.status == "todo" %}selected{% endif %}>
+                                    To do
+                                </option>
+
+                                <option value="doing"
+                                    {% if task.status == "doing" %}selected{% endif %}>
+                                    In progress
+                                </option>
+
+                                <option value="done"
+                                    {% if task.status == "done" %}selected{% endif %}>
+                                    Completed
+                                </option>
+
+                            </select>
+
+                        </form>
+
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+
+{% if project.owner_id == user.id %}
+
+    <div class="member-panel">
+
+        <div>
+            <span class="eyebrow">COLLABORATION</span>
+
+            <h3>Team members</h3>
+
+            <p class="muted">
+                Add registered TaskFlow users to this project.
+            </p>
+        </div>
+
+
+        <form method="post"
+              action="{% url 'add_member' project.pk %}"
+              class="inline-form">
+
+            {% csrf_token %}
+
+            <input type="text"
+                   name="username"
+                   placeholder="Enter exact username"
+                   required>
+
+            <button type="submit" class="btn primary">
+                ＋ Add member
+            </button>
+
+        </form>
+
+
+        <div class="member-list">
+
+            {% for member in project.members.all %}
+
+                <span class="member-chip">
+
+                    <i>{{ member.username|first|upper }}</i>
+
+                    {{ member.username }}
+
+                    {% if member.id == project.owner_id %}
+                        <small>Owner</small>
+                    {% endif %}
+
+                </span>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script id="taskflow-config"
+        type="application/json">
+    {{ project.pk|json_script:"taskflow-project-id" }}
+</script>
+
+{% endblock %}

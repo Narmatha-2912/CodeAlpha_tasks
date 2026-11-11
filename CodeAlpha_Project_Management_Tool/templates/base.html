@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TaskFlow{% endblock %} | TaskFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="{% url 'dashboard' %}"><span class="brand-mark">T</span><span>taskflow</span></a>
+    <div class="workspace-label">WORKSPACE</div>
+    <nav>
+      <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><span>▦</span> Overview</a>
+      <a href="{% url 'dashboard' %}"><span>▤</span> My projects</a>
+      <a href="{% url 'notifications' %}"><span>♧</span> Notifications <b class="nav-count">{{ unread_notifications }}</b></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="avatar">{{ user.username|first|upper }}</div>
+      <div class="user-mini"><strong>{{ user.username }}</strong><small>{{ user.email|default:"TaskFlow member" }}</small></div>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="icon-button" title="Log out">↗</button></form>
+    </div>
+  </aside>
+  <main class="main-area">
+    <header class="topbar"><div><span class="eyebrow">YOUR WORKSPACE</span><h2>{% block page_heading %}Overview{% endblock %}</h2></div>
+      <div class="top-actions"><a class="notification-button" href="{% url 'notifications' %}">♧ <i>{{ unread_notifications }}</i></a><div class="top-avatar">{{ user.username|first|upper }}</div></div>
+    </header>
+    <section class="content">
+      {% for message in messages %}<div class="flash {{ message.tags }}">{{ message }}</div>{% endfor %}
+      {% block content %}{% endblock %}
+    </section>
+  </main>
+</div>
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+<script src="{% static 'js/app.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body></html>

@@ -1,0 +1,151 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ task.title }}{% endblock %}
+{% block page_heading %}Task details{% endblock %}
+
+{% block content %}
+
+<a class="back-link" href="{% url 'project_detail' project.pk %}">
+    ← Back to {{ project.name }}
+</a>
+
+<div class="detail-layout">
+    <section class="detail-main">
+
+        <div class="detail-card">
+
+            <div class="detail-top">
+                <span class="priority {{ task.priority }}">
+                    {{ task.get_priority_display }} priority
+                </span>
+
+                <span class="status-text {{ task.status }}">
+                    {{ task.get_status_display }}
+                </span>
+            </div>
+
+            <h2>{{ task.title }}</h2>
+
+            <p class="detail-description">
+                {{ task.description|default:"No task description provided." }}
+            </p>
+
+            <div class="detail-meta">
+                <div>
+                    <small>ASSIGNED TO</small>
+                    <strong>{{ task.assignee.username|default:"Unassigned" }}</strong>
+                </div>
+
+                <div>
+                    <small>DUE DATE</small>
+                    <strong>{{ task.due_date|date:"M d, Y"|default:"Not set" }}</strong>
+                </div>
+
+                <div>
+                    <small>CREATED BY</small>
+                    <strong>{{ task.created_by.username }}</strong>
+                </div>
+            </div>
+
+            <form method="post"
+                  action="{% url 'task_status' task.pk %}"
+                  class="detail-status-form">
+
+                {% csrf_token %}
+
+                <label>Update status</label>
+
+                <select name="status">
+                    <option value="todo" {% if task.status == 'todo' %}selected{% endif %}>
+                        To do
+                    </option>
+
+                    <option value="doing" {% if task.status == 'doing' %}selected{% endif %}>
+                        In progress
+                    </option>
+
+                    <option value="done" {% if task.status == 'done' %}selected{% endif %}>
+                        Completed
+                    </option>
+                </select>
+
+                <button type="submit" class="btn primary">
+                    Update
+                </button>
+
+            </form>
+
+        </div>
+
+        <!-- COMMENTS SECTION -->
+
+        <div class="detail-card comments-card">
+
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">TEAM CONVERSATION</span>
+
+                    <h3>
+                        Comments
+                        <span class="comment-count">
+                            {{ task.comments.count }}
+                        </span>
+                    </h3>
+                </div>
+            </div>
+
+            <!-- ADD COMMENT FORM -->
+
+            <form method="post" class="comment-form">
+
+                {% csrf_token %}
+
+                {{ form.body }}
+
+                <button type="submit" class="btn primary">
+                    Post Comment →
+                </button>
+
+            </form>
+
+            <!-- DISPLAY EXISTING COMMENTS -->
+
+            <div class="comments-list">
+
+                {% for comment in task.comments.all %}
+
+                    <div class="comment">
+
+                        <div class="avatar small-avatar">
+                            {{ comment.author.username|first|upper }}
+                        </div>
+
+                        <div>
+                            <strong>{{ comment.author.username }}</strong>
+
+                            <small>
+                                {{ comment.created_at|date:"M d, Y · g:i A" }}
+                            </small>
+
+                            <p>{{ comment.body|linebreaksbr }}</p>
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <p class="muted">
+                        No comments yet. Start the conversation!
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </section>
+</div>
+
+{% endblock %}
