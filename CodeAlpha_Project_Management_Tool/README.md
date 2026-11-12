@@ -32,7 +32,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\venv\Scripts\Activate.ps1
 ```
 
-Open http://127.0.0.1:8000/
+Open http://127.0.0.1:8000/dashboard/
 
 ## First use
 1. Register two or more accounts in separate browser sessions (or use a second browser).
