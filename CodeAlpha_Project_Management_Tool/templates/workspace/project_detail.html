@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ project.name }}{% endblock %}
 {% block page_heading %}{{ project.name }}{% endblock %}
@@ -239,11 +240,19 @@
 {% endblock %}
 
 
+
 {% block scripts %}
 
-<script id="taskflow-config"
-        type="application/json">
-    {{ project.pk|json_script:"taskflow-project-id" }}
+{{ project.pk|json_script:"taskflow-project-id" }}
+
+<script>
+    const projectIdElement = document.getElementById("taskflow-project-id");
+
+    if (projectIdElement) {
+        window.taskflowProjectId = JSON.parse(projectIdElement.textContent);
+    }
 </script>
+
+<script src="{% static 'js/realtime.js' %}"></script>
 
 {% endblock %}
